@@ -37,6 +37,15 @@ export default function CompetitionListPage() {
     navigate(`/UT-page/competition-detail/${competition.id}`);
   }
 
+  function handleAction(competition) {
+    if (competition.cta === "Atur Termin Pembayaran") {
+      navigate(`/UT-page/competition-detail/${competition.id}/payment-terms`);
+      return;
+    }
+
+    showToast(competition.cta);
+  }
+
   function handleReset() {
     setActiveTab("all");
     setQuery("");
@@ -55,7 +64,7 @@ export default function CompetitionListPage() {
               key={competition.id}
               competition={competition}
               onDetail={handleDetail}
-              onAction={showToast}
+              onAction={handleAction}
               onMore={() => showToast("Menu lainnya dibuka")}
             />
           ))}

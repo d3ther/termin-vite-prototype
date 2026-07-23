@@ -44,7 +44,7 @@ export default function CompetitionCard({ competition, onDetail, onAction, onMor
       <div className="card-foot">
         <button className="link-button" type="button" onClick={() => onDetail(competition)}>Lihat Detail</button>
         {competition.cta && (
-          <button className="primary-button" type="button" onClick={() => onAction(competition.cta)}>
+          <button className="primary-button" type="button" onClick={() => onAction(competition)}>
             {competition.cta}
           </button>
         )}
