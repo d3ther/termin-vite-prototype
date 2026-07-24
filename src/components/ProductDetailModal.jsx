@@ -220,12 +220,6 @@ export default function ProductDetailModal({ open, onClose }) {
                   onClick={() => switchProduct(index)}
                 >
                   <span>{product.path}</span>
-                  <small>
-                    <span>{product.type}</span>
-                    <span>
-                      Produk diatur: <strong>{product.configured}</strong>
-                    </span>
-                  </small>
                 </button>
               ))}
             </aside>
@@ -267,7 +261,9 @@ export default function ProductDetailModal({ open, onClose }) {
         </div>
 
         <footer className="product-detail-modal-foot">
-          <button type="button" onClick={requestClose}>Tutup</button>
+          <button type="button" onClick={requestClose}>
+            Tutup
+          </button>
         </footer>
       </section>
     </div>

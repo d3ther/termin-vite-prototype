@@ -21,3 +21,31 @@ export const PAYMENT_DESTINATIONS = [
     total: "Rp 18.500.000",
   },
 ];
+
+export const PAYMENT_PRODUCTS = [
+  [
+    "AC Split 1 PK Panasonic",
+    "AC Split 1.5 PK Daikin",
+    "AC Split 1 PK Panasonic",
+    "AC Split 1.5 PK Daikin",
+    "AC Split 1 PK Panasonic",
+    "AC Cassette 2 PK Daikin",
+    "Bracket Outdoor Heavy Duty",
+  ],
+  [
+    "AC Split 1 PK Sharp",
+    "AC Split 2 PK Daikin",
+    "Pipa Tembaga 5 Meter",
+    "Bracket Outdoor",
+    "Kabel AC Premium",
+    "AC Split 1.5 PK Panasonic",
+  ],
+  [
+    "AC Split 1 PK LG",
+    "AC Split 1 PK Panasonic",
+    "Bracket Outdoor",
+    "Pipa Tembaga 3 Meter",
+    "Remote AC Universal",
+    "Kabel AC Premium",
+  ],
+];

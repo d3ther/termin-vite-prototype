@@ -1,34 +1,9 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { PAYMENT_DESTINATIONS } from "../data/paymentTerms";
+import {
+  PAYMENT_DESTINATIONS,
+  PAYMENT_PRODUCTS,
+} from "../data/paymentTerms";
 import { TERMIN_OPTIONS } from "./TerminDropdown";
-
-const products = [
-  [
-    "AC Split 1 PK Panasonic",
-    "AC Split 1.5 PK Daikin",
-    "AC Split 1 PK Panasonic",
-    "AC Split 1.5 PK Daikin",
-    "AC Split 1 PK Panasonic",
-    "AC Cassette 2 PK Daikin",
-    "Bracket Outdoor Heavy Duty",
-  ],
-  [
-    "AC Split 1 PK Sharp",
-    "AC Split 2 PK Daikin",
-    "Pipa Tembaga 5 Meter",
-    "Bracket Outdoor",
-    "Kabel AC Premium",
-    "AC Split 1.5 PK Panasonic",
-  ],
-  [
-    "AC Split 1 PK LG",
-    "AC Split 1 PK Panasonic",
-    "Bracket Outdoor",
-    "Pipa Tembaga 3 Meter",
-    "Remote AC Universal",
-    "Kabel AC Premium",
-  ],
-];
 
 export default function PaymentAllocationModal({
   open,
@@ -315,7 +290,7 @@ export default function PaymentAllocationModal({
                       </tr>
                     </thead>
                     <tbody>
-                      {products[index].map((product, rowIndex) => (
+                      {PAYMENT_PRODUCTS[index].map((product, rowIndex) => (
                         <tr key={`${product}-${rowIndex}`}>
                           <td>{product}</td>
                           <td>{rowIndex % 2 ? 5 : 10} unit</td>
