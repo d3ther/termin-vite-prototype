@@ -1,24 +1,6 @@
 import { useEffect, useState } from "react";
 import { X } from "lucide-react";
 
-const deliveries = [
-  {
-    name: "Kantor Cabang Bogor",
-    address:
-      "Jl. Merdeka No. 12, RT.3/RW.2, Kelurahan Sempur, Kecamatan Bogor Tengah, Kota Bogor, Jawa Barat 16129",
-  },
-  {
-    name: "Kantor Cabang Bandung",
-    address:
-      "Jl. Pahlawan No. 45, RT.6/RW.1, Kelurahan Neglasari, Kecamatan Cibeunying Kaler, Kota Bandung, Jawa Barat 40123",
-  },
-  {
-    name: "SAWANGAN DEPOK",
-    address:
-      "Jl. Merdeka No. 12, RT.3/RW.2, Kelurahan Sempur, Kecamatan Bogor Tengah, Kota Bogor, Jawa Barat 16129",
-  },
-];
-
 export default function PaymentTermDetailModal({ open, termin, onClose }) {
   const [entered, setEntered] = useState(false);
 
@@ -47,8 +29,7 @@ export default function PaymentTermDetailModal({ open, termin, onClose }) {
     window.setTimeout(onClose, 300);
   }
 
-  const visibleDeliveries =
-    termin?.number === 2 ? deliveries.slice(0, 2) : deliveries;
+  const visibleDeliveries = termin?.deliveries ?? [];
 
   return (
     <div

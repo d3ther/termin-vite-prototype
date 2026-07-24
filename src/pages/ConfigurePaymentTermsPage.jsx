@@ -4,11 +4,24 @@ import { useNavigate, useParams } from "react-router-dom";
 import Header from "../components/Header";
 import PaymentAllocationModal from "../components/PaymentAllocationModal";
 import TerminDropdown from "../components/TerminDropdown";
+import {
+  discardPaymentTermsDraft,
+  getProviderPaymentTerms,
+  savePaymentTermsDraft,
+} from "../utils/paymentTermsStorage";
 
 export default function ConfigurePaymentTermsPage() {
   const navigate = useNavigate();
   const { competitionId, providerId } = useParams();
-  const [terminCount, setTerminCount] = useState(null);
+  const providerPaymentTerms = getProviderPaymentTerms(
+    competitionId,
+    providerId,
+  );
+  const retainedPaymentTerms =
+    providerPaymentTerms.draft ?? providerPaymentTerms.saved;
+  const [terminCount, setTerminCount] = useState(
+    retainedPaymentTerms?.terminCount ?? null,
+  );
   const [modalOpen, setModalOpen] = useState(false);
 
   return (
@@ -56,9 +69,12 @@ export default function ConfigurePaymentTermsPage() {
         <button
           className="secondary-footer-button"
           type="button"
-          onClick={() =>
-            navigate(`/UT-page/competition-detail/${competitionId}/payment-terms`)
-          }
+          onClick={() => {
+            discardPaymentTermsDraft(competitionId, providerId);
+            navigate(
+              `/UT-page/competition-detail/${competitionId}/payment-terms`,
+            );
+          }}
         >
           Batal
         </button>
@@ -69,12 +85,14 @@ export default function ConfigurePaymentTermsPage() {
       <PaymentAllocationModal
         open={modalOpen}
         terminCount={terminCount}
+        initialSelections={retainedPaymentTerms?.allocations}
         onClose={() => setModalOpen(false)}
-        onSuccess={() =>
+        onSuccess={(configuration) => {
+          savePaymentTermsDraft(competitionId, providerId, configuration);
           navigate(
             `/UT-page/competition-detail/${competitionId}/payment-terms/${providerId}/summary`,
-          )
-        }
+          );
+        }}
       />
     </div>
   );

@@ -3,24 +3,92 @@ import { ArrowLeft } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import Header from "../components/Header";
 import ConfirmationModal from "../components/ConfirmationModal";
+import PaymentAllocationModal from "../components/PaymentAllocationModal";
 import PaymentTermDetailModal from "../components/PaymentTermDetailModal";
 import TerminDropdown from "../components/TerminDropdown";
-
-const termins = [
-  { number: 1, locations: 3 },
-  { number: 2, locations: 2 },
-];
+import { PAYMENT_DESTINATIONS } from "../data/paymentTerms";
+import {
+  commitPaymentTerms,
+  discardPaymentTermsDraft,
+  getProviderPaymentTerms,
+  savePaymentTermsDraft,
+} from "../utils/paymentTermsStorage";
 
 export default function PaymentTermsSummaryPage() {
   const navigate = useNavigate();
   const { competitionId, providerId } = useParams();
-  const [terminCount, setTerminCount] = useState(2);
+  const providerPaymentTerms = getProviderPaymentTerms(
+    competitionId,
+    providerId,
+  );
+  const configuration = providerPaymentTerms.draft ??
+    providerPaymentTerms.saved ?? {
+      terminCount: 2,
+      allocations: ["termin-1", "termin-1", "termin-2"],
+    };
+  const [terminCount, setTerminCount] = useState(configuration.terminCount);
+  const [pendingTerminCount, setPendingTerminCount] = useState(null);
   const [detailTermin, setDetailTermin] = useState(null);
+  const [allocationModalOpen, setAllocationModalOpen] = useState(false);
   const [confirmation, setConfirmation] = useState("");
 
   const providerListPath =
     `/UT-page/competition-detail/${competitionId}/payment-terms`;
   const configurePath = `${providerListPath}/${providerId}`;
+  const termins = Array.from({ length: terminCount }, (_, index) => {
+    const number = index + 1;
+    const deliveries = PAYMENT_DESTINATIONS.filter(
+      (_, destinationIndex) =>
+        configuration.allocations[destinationIndex] === `termin-${number}`,
+    );
+
+    return {
+      number,
+      locations: deliveries.length,
+      deliveries,
+    };
+  });
+
+  function requestTerminChange(nextTerminCount) {
+    if (nextTerminCount === configuration.terminCount) {
+      setTerminCount(nextTerminCount);
+      return;
+    }
+
+    setTerminCount(nextTerminCount);
+    setPendingTerminCount(nextTerminCount);
+    setConfirmation("change");
+  }
+
+  function cancelTerminChange() {
+    setTerminCount(configuration.terminCount);
+    setPendingTerminCount(null);
+    setConfirmation("");
+  }
+
+  function confirmTerminChange() {
+    const nextTerminCount = pendingTerminCount ?? terminCount;
+    savePaymentTermsDraft(competitionId, providerId, {
+      terminCount: nextTerminCount,
+      allocations: PAYMENT_DESTINATIONS.map(() => ""),
+    });
+    navigate(configurePath);
+  }
+
+  function cancelChanges() {
+    discardPaymentTermsDraft(competitionId, providerId);
+    navigate(providerListPath);
+  }
+
+  function saveConfiguration() {
+    if (terminCount !== configuration.terminCount) {
+      setConfirmation("change");
+      return;
+    }
+
+    commitPaymentTerms(competitionId, providerId);
+    navigate(providerListPath);
+  }
 
   return (
     <div className="payment-terms-page terms-summary-page">
@@ -49,14 +117,17 @@ export default function PaymentTermsSummaryPage() {
             <strong>Jumlah Termin</strong>
             <small>Pilih jumlah termin pembayaran yang Anda inginkan.</small>
           </span>
-          <TerminDropdown value={terminCount} onChange={setTerminCount} />
+          <TerminDropdown
+            value={terminCount}
+            onChange={requestTerminChange}
+          />
         </section>
 
         <div className="summary-terms-title">
-          <strong>Termin Pembayaran (4)</strong>
+          <strong>Termin Pembayaran ({terminCount})</strong>
           <button
             type="button"
-            onClick={() => setConfirmation("change")}
+            onClick={() => setAllocationModalOpen(true)}
           >
             Ubah Pengaturan Termin
           </button>
@@ -97,9 +168,7 @@ export default function PaymentTermsSummaryPage() {
         </button>
         <button
           type="button"
-          onClick={() =>
-            navigate(`${providerListPath}?configured=${providerId}`)
-          }
+          onClick={saveConfiguration}
         >
           Simpan
         </button>
@@ -111,14 +180,29 @@ export default function PaymentTermsSummaryPage() {
         onClose={() => setDetailTermin(null)}
       />
 
+      <PaymentAllocationModal
+        open={allocationModalOpen}
+        terminCount={configuration.terminCount}
+        initialSelections={configuration.allocations}
+        onClose={() => setAllocationModalOpen(false)}
+        onSuccess={(updatedConfiguration) => {
+          savePaymentTermsDraft(
+            competitionId,
+            providerId,
+            updatedConfiguration,
+          );
+          setAllocationModalOpen(false);
+        }}
+      />
+
       <ConfirmationModal
         open={confirmation === "change"}
         title="Yakin Ubah Jumlah Termin?"
         description="Setelah klik “Ya, Ubah”, data pengiriman yang sebelumnya disimpan akan dihapus dan perlu diatur ulang."
         cancelLabel="Batal"
         confirmLabel="Ya, Ubah"
-        onCancel={() => setConfirmation("")}
-        onConfirm={() => navigate(configurePath)}
+        onCancel={cancelTerminChange}
+        onConfirm={confirmTerminChange}
       />
 
       <ConfirmationModal
@@ -128,7 +212,7 @@ export default function PaymentTermsSummaryPage() {
         cancelLabel="Kembali"
         confirmLabel="Ya, Keluar"
         onCancel={() => setConfirmation("")}
-        onConfirm={() => navigate(providerListPath)}
+        onConfirm={cancelChanges}
       />
     </div>
   );

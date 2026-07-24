@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { ArrowLeft, ChevronRight } from "lucide-react";
-import { useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import Header from "../components/Header";
 import Toast from "../components/Toast";
+import { getSavedPaymentTermsForCompetition } from "../utils/paymentTermsStorage";
 
 const providers = [
   {
@@ -22,9 +23,9 @@ const providers = [
 export default function PaymentTermsPage() {
   const navigate = useNavigate();
   const { competitionId } = useParams();
-  const [searchParams] = useSearchParams();
   const [toast, setToast] = useState("");
-  const configuredProviderId = Number(searchParams.get("configured"));
+  const configuredProviders =
+    getSavedPaymentTermsForCompetition(competitionId);
 
   function showToast(message) {
     setToast(message);
@@ -54,7 +55,8 @@ export default function PaymentTermsPage() {
 
         <div className="provider-list">
           {providers.map((provider) => {
-            const isConfigured = provider.id === configuredProviderId;
+            const savedPaymentTerms = configuredProviders[provider.id];
+            const isConfigured = Boolean(savedPaymentTerms);
 
             return (
             <article
@@ -88,12 +90,16 @@ export default function PaymentTermsPage() {
                 </div>
                 <div>
                   <span>Jumlah Pengiriman</span>
-                  <strong>{isConfigured ? "5 Lokasi" : provider.deliveryCount}</strong>
+                  <strong>
+                    {isConfigured
+                      ? `${savedPaymentTerms.allocations.filter(Boolean).length} Lokasi`
+                      : provider.deliveryCount}
+                  </strong>
                 </div>
                 {isConfigured && (
                   <div>
                     <span>Jumlah Termin</span>
-                    <strong>2</strong>
+                    <strong>{savedPaymentTerms.terminCount}</strong>
                   </div>
                 )}
               </div>
