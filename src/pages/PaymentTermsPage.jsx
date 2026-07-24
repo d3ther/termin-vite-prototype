@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ArrowLeft, ChevronRight } from "lucide-react";
+import { ArrowLeft, ChevronRight, TriangleAlert } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import Header from "../components/Header";
 import Toast from "../components/Toast";
@@ -24,12 +24,27 @@ export default function PaymentTermsPage() {
   const navigate = useNavigate();
   const { competitionId } = useParams();
   const [toast, setToast] = useState("");
+  const [showValidationErrors, setShowValidationErrors] = useState(false);
   const configuredProviders =
     getSavedPaymentTermsForCompetition(competitionId);
 
   function showToast(message) {
     setToast(message);
     window.setTimeout(() => setToast(""), 1600);
+  }
+
+  function savePaymentTerms() {
+    const hasUnconfiguredProvider = providers.some(
+      (provider) => !configuredProviders[provider.id],
+    );
+
+    if (hasUnconfiguredProvider) {
+      setShowValidationErrors(true);
+      return;
+    }
+
+    setShowValidationErrors(false);
+    showToast("Pengaturan termin pembayaran disimpan");
   }
 
   return (
@@ -57,63 +72,75 @@ export default function PaymentTermsPage() {
           {providers.map((provider) => {
             const savedPaymentTerms = configuredProviders[provider.id];
             const isConfigured = Boolean(savedPaymentTerms);
+            const hasError = showValidationErrors && !isConfigured;
 
             return (
-            <article
-              className={`provider-card${isConfigured ? " configured" : ""}`}
-              key={provider.id}
-            >
-              <div className="provider-card-head">
-                <strong>Penyedia {provider.id}</strong>
-                <button
-                  type="button"
-                  onClick={() =>
-                    navigate(
-                      `/UT-page/competition-detail/${competitionId}/payment-terms/${provider.id}`,
-                    )
+              <div className="provider-card-wrapper" key={provider.id}>
+                <article
+                  className={`provider-card${isConfigured ? " configured" : ""}${hasError ? " error" : ""}`}
+                  aria-invalid={hasError}
+                  aria-describedby={
+                    hasError ? `provider-error-${provider.id}` : undefined
                   }
                 >
-                  {isConfigured
-                    ? "Ubah Termin Pembayaran"
-                    : "Atur Termin Pembayaran"}{" "}
-                  <ChevronRight size={20} />
-                </button>
-              </div>
-              <div className="provider-card-body">
-                <div>
-                  <span>Nama Penyedia</span>
-                  <strong>{provider.name}</strong>
-                </div>
-                <div>
-                  <span>Jumlah Produk</span>
-                  <strong>{provider.productCount}</strong>
-                </div>
-                <div>
-                  <span>Jumlah Pengiriman</span>
-                  <strong>
-                    {isConfigured
-                      ? `${savedPaymentTerms.allocations.filter(Boolean).length} Lokasi`
-                      : provider.deliveryCount}
-                  </strong>
-                </div>
-                {isConfigured && (
-                  <div>
-                    <span>Jumlah Termin</span>
-                    <strong>{savedPaymentTerms.terminCount}</strong>
+                  <div className="provider-card-head">
+                    <strong>Penyedia {provider.id}</strong>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        navigate(
+                          `/UT-page/competition-detail/${competitionId}/payment-terms/${provider.id}`,
+                        )
+                      }
+                    >
+                      {isConfigured
+                        ? "Ubah Termin Pembayaran"
+                        : "Atur Termin Pembayaran"}{" "}
+                      <ChevronRight size={20} />
+                    </button>
                   </div>
+                  <div className="provider-card-body">
+                    <div>
+                      <span>Nama Penyedia</span>
+                      <strong>{provider.name}</strong>
+                    </div>
+                    <div>
+                      <span>Jumlah Produk</span>
+                      <strong>{provider.productCount}</strong>
+                    </div>
+                    <div>
+                      <span>Jumlah Pengiriman</span>
+                      <strong>
+                        {isConfigured
+                          ? `${savedPaymentTerms.allocations.filter(Boolean).length} Lokasi`
+                          : provider.deliveryCount}
+                      </strong>
+                    </div>
+                    {isConfigured && (
+                      <div>
+                        <span>Jumlah Termin</span>
+                        <strong>{savedPaymentTerms.terminCount}</strong>
+                      </div>
+                    )}
+                  </div>
+                </article>
+                {hasError && (
+                  <span
+                    className="provider-card-error"
+                    id={`provider-error-${provider.id}`}
+                  >
+                    <TriangleAlert size={12} strokeWidth={1.8} />
+                    Anda wajib melakukan atur termin pada setiap penyedia.
+                  </span>
                 )}
               </div>
-            </article>
             );
           })}
         </div>
       </main>
 
       <footer className="payment-terms-footer">
-        <button
-          type="button"
-          onClick={() => showToast("Pengaturan termin pembayaran disimpan")}
-        >
+        <button type="button" onClick={savePaymentTerms}>
           Simpan
         </button>
       </footer>

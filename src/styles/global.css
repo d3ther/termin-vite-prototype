@@ -928,11 +928,30 @@ button {
   gap: 16px;
   margin-top: 24px;
 }
+.provider-card-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
 .provider-card {
   overflow: hidden;
   border: 1px solid var(--line);
   border-radius: 8px;
   background: #fff;
+}
+.provider-card.error {
+  border-color: #f04438;
+}
+.provider-card-error {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: #f04438;
+  font-size: 12px;
+  line-height: 18px;
+}
+.provider-card-error svg {
+  flex: 0 0 auto;
 }
 .provider-card-head {
   min-height: 72px;
