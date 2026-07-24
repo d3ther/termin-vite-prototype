@@ -691,6 +691,7 @@ button {
 .schedule-grid p {
   margin: 8px 0 0;
   line-height: 20px;
+  width: 140px;
 }
 .shipments-section .detail-section-body {
   padding: 0 16px 24px;
@@ -825,6 +826,12 @@ button {
   display: flex;
   flex-direction: column;
   gap: 8px;
+}
+
+.detail-row-sublabel {
+  display: block;
+  font-size: 12px;
+  line-height: 18px;
 }
 .detail-row-label small {
   display: block;

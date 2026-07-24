@@ -95,7 +95,7 @@ const detailFields = [
   ["Total HPS Produk", "total"],
 ];
 
-export default function ProductDetailModal({ open, onClose }) {
+export default function ProductDetailModal({ open, onClose, shipment }) {
   const [active, setActive] = useState(0);
   const [transition, setTransition] = useState(null);
   const [entered, setEntered] = useState(false);
@@ -189,17 +189,22 @@ export default function ProductDetailModal({ open, onClose }) {
         </header>
 
         <div className="product-detail-location">
-          <strong>Pengiriman 1</strong>
-          <strong>Kantor Cabang Bandung</strong>
-          <span>Dinda Mareta Putri (6281234567890)</span>
+          <strong>Pengiriman {shipment?.number ?? 1}</strong>
+          <strong>
+            {shipment?.locationName ?? "Cabang Dinas Pendidikan Wilayah Bogor"}
+          </strong>
           <span>
-            Jl. Holis Regency No.37A, Kelurahan Sukahaji, Kecamatan Babakan
-            Ciparay, Kota Bandung, Jawa Barat 40221.
+            {shipment?.recipientName ?? "Fauzan Ramadhan"} (
+            {shipment?.phone ?? "0813-1111-2222"})
+          </span>
+          <span>
+            {shipment?.address ??
+              "Jl. Merdeka No. 12, RT.3/RW.2, Kelurahan Sempur, Kecamatan Bogor Tengah, Kota Bogor, Jawa Barat 16129"}
           </span>
           <small>Catatan:</small>
           <span>
-            Kirim ke Jl. Merdeka No. 12, Bogor, harap tiba sebelum jam 10 pagi.
-            Hubungi penerima untuk konfirmasi.
+            {shipment?.note ??
+              "Kirim ke gudang belakang, konfirmasi ke satpam sebelum pukul 15.00"}
           </span>
         </div>
 

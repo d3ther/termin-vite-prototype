@@ -4,6 +4,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import Header from "../components/Header";
 import PaymentAllocationModal from "../components/PaymentAllocationModal";
 import TerminDropdown from "../components/TerminDropdown";
+import { getPaymentTermsData } from "../data/paymentTerms";
 import {
   discardPaymentTermsDraft,
   getProviderPaymentTerms,
@@ -13,6 +14,7 @@ import {
 export default function ConfigurePaymentTermsPage() {
   const navigate = useNavigate();
   const { competitionId, providerId } = useParams();
+  const { destinations, products } = getPaymentTermsData(providerId);
   const providerPaymentTerms = getProviderPaymentTerms(
     competitionId,
     providerId,
@@ -86,6 +88,8 @@ export default function ConfigurePaymentTermsPage() {
         open={modalOpen}
         terminCount={terminCount}
         initialSelections={retainedPaymentTerms?.allocations}
+        destinations={destinations}
+        products={products}
         onClose={() => setModalOpen(false)}
         onSuccess={(configuration) => {
           savePaymentTermsDraft(competitionId, providerId, configuration);

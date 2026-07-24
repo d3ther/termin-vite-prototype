@@ -6,7 +6,7 @@ import ConfirmationModal from "../components/ConfirmationModal";
 import PaymentAllocationModal from "../components/PaymentAllocationModal";
 import PaymentTermDetailModal from "../components/PaymentTermDetailModal";
 import TerminDropdown from "../components/TerminDropdown";
-import { PAYMENT_DESTINATIONS } from "../data/paymentTerms";
+import { getPaymentTermsData } from "../data/paymentTerms";
 import {
   commitPaymentTerms,
   discardPaymentTermsDraft,
@@ -17,6 +17,7 @@ import {
 export default function PaymentTermsSummaryPage() {
   const navigate = useNavigate();
   const { competitionId, providerId } = useParams();
+  const { destinations, products } = getPaymentTermsData(providerId);
   const providerPaymentTerms = getProviderPaymentTerms(
     competitionId,
     providerId,
@@ -24,7 +25,13 @@ export default function PaymentTermsSummaryPage() {
   const configuration = providerPaymentTerms.draft ??
     providerPaymentTerms.saved ?? {
       terminCount: 2,
-      allocations: ["termin-1", "termin-1", "termin-2"],
+      allocations: [
+        "termin-1",
+        "termin-1",
+        "termin-1",
+        "termin-2",
+        "termin-2",
+      ],
     };
   const [terminCount, setTerminCount] = useState(configuration.terminCount);
   const [pendingTerminCount, setPendingTerminCount] = useState(null);
@@ -32,12 +39,11 @@ export default function PaymentTermsSummaryPage() {
   const [allocationModalOpen, setAllocationModalOpen] = useState(false);
   const [confirmation, setConfirmation] = useState("");
 
-  const providerListPath =
-    `/UT-page/competition-detail/${competitionId}/payment-terms`;
+  const providerListPath = `/UT-page/competition-detail/${competitionId}/payment-terms`;
   const configurePath = `${providerListPath}/${providerId}`;
   const termins = Array.from({ length: terminCount }, (_, index) => {
     const number = index + 1;
-    const deliveries = PAYMENT_DESTINATIONS.filter(
+    const deliveries = destinations.filter(
       (_, destinationIndex) =>
         configuration.allocations[destinationIndex] === `termin-${number}`,
     );
@@ -70,7 +76,7 @@ export default function PaymentTermsSummaryPage() {
     const nextTerminCount = pendingTerminCount ?? terminCount;
     savePaymentTermsDraft(competitionId, providerId, {
       terminCount: nextTerminCount,
-      allocations: PAYMENT_DESTINATIONS.map(() => ""),
+      allocations: destinations.map(() => ""),
     });
     navigate(configurePath);
   }
@@ -97,17 +103,14 @@ export default function PaymentTermsSummaryPage() {
         <button
           className="payment-terms-title"
           type="button"
-          onClick={() =>
-            navigate(
-              configurePath,
-            )
-          }
+          onClick={() => navigate(configurePath)}
         >
           <ArrowLeft size={24} strokeWidth={1.7} />
           <span>
             <strong>Atur Termin Pembayaran</strong>
             <small>
-              Tentukan jumlah termin dan detail pengiriman untuk setiap termin pembayaran.
+              Tentukan jumlah termin dan detail pengiriman untuk setiap termin
+              pembayaran.
             </small>
           </span>
         </button>
@@ -117,18 +120,12 @@ export default function PaymentTermsSummaryPage() {
             <strong>Jumlah Termin</strong>
             <small>Pilih jumlah termin pembayaran yang Anda inginkan.</small>
           </span>
-          <TerminDropdown
-            value={terminCount}
-            onChange={requestTerminChange}
-          />
+          <TerminDropdown value={terminCount} onChange={requestTerminChange} />
         </section>
 
         <div className="summary-terms-title">
           <strong>Termin Pembayaran ({terminCount})</strong>
-          <button
-            type="button"
-            onClick={() => setAllocationModalOpen(true)}
-          >
+          <button type="button" onClick={() => setAllocationModalOpen(true)}>
             Ubah Pengaturan Termin
           </button>
         </div>
@@ -146,12 +143,36 @@ export default function PaymentTermsSummaryPage() {
                 </button>
               </div>
               <div className="summary-term-prices">
-                <div><span>Harga Produk <small>(35)</small></span><span>Rp54.500.000</span></div>
-                <div><span>Harga Layanan Tambahan <small>(5)</small></span><span>Rp1.000.000</span></div>
-                <div><span>Ongkos Kirim - Kurir Penyedia <small>(141,2kg)</small></span><span>Rp3.500.000</span></div>
-                <div><span>PPN</span><span>Rp1.500.000</span></div>
-                <div><span>PPnBM</span><span>Rp1.500.000</span></div>
-                <div className="summary-term-total"><strong>Total Pembayaran Termin {termin.number}</strong><strong>Rp58.500.000</strong></div>
+                <div>
+                  <span>
+                    Harga Produk <small>(35)</small>
+                  </span>
+                  <span>Rp54.500.000</span>
+                </div>
+                <div>
+                  <span>
+                    Harga Layanan Tambahan <small>(5)</small>
+                  </span>
+                  <span>Rp1.000.000</span>
+                </div>
+                <div>
+                  <span>
+                    Ongkos Kirim - Kurir Penyedia <small>(141,2kg)</small>
+                  </span>
+                  <span>Rp3.500.000</span>
+                </div>
+                <div>
+                  <span>PPN</span>
+                  <span>Rp1.500.000</span>
+                </div>
+                <div>
+                  <span>PPnBM</span>
+                  <span>Rp1.500.000</span>
+                </div>
+                <div className="summary-term-total">
+                  <strong>Total Pembayaran Termin {termin.number}</strong>
+                  <strong>Rp58.500.000</strong>
+                </div>
               </div>
             </article>
           ))}
@@ -166,10 +187,7 @@ export default function PaymentTermsSummaryPage() {
         >
           Batal
         </button>
-        <button
-          type="button"
-          onClick={saveConfiguration}
-        >
+        <button type="button" onClick={saveConfiguration}>
           Simpan
         </button>
       </footer>
@@ -184,6 +202,8 @@ export default function PaymentTermsSummaryPage() {
         open={allocationModalOpen}
         terminCount={configuration.terminCount}
         initialSelections={configuration.allocations}
+        destinations={destinations}
+        products={products}
         onClose={() => setAllocationModalOpen(false)}
         onSuccess={(updatedConfiguration) => {
           savePaymentTermsDraft(

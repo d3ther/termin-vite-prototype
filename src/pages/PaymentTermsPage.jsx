@@ -8,15 +8,15 @@ import { getSavedPaymentTermsForCompetition } from "../utils/paymentTermsStorage
 const providers = [
   {
     id: 1,
-    name: "PT. Pesona Alam Nusantara",
-    productCount: "20",
-    deliveryCount: "2 Lokasi",
+    name: "CV Mitra Elektronik Sejahtera",
+    productCount: "1",
+    deliveryCount: "5 Lokasi",
   },
   {
     id: 2,
-    name: "PT. Berkah Cahaya Langit Abadi",
-    productCount: "10",
-    deliveryCount: "2 Lokasi",
+    name: "PT Sumber Pendingin Jaya",
+    productCount: "1",
+    deliveryCount: "5 Lokasi",
   },
 ];
 
@@ -25,8 +25,7 @@ export default function PaymentTermsPage() {
   const { competitionId } = useParams();
   const [toast, setToast] = useState("");
   const [showValidationErrors, setShowValidationErrors] = useState(false);
-  const configuredProviders =
-    getSavedPaymentTermsForCompetition(competitionId);
+  const configuredProviders = getSavedPaymentTermsForCompetition(competitionId);
 
   function showToast(message) {
     setToast(message);

@@ -1,8 +1,4 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import {
-  PAYMENT_DESTINATIONS,
-  PAYMENT_PRODUCTS,
-} from "../data/paymentTerms";
 import { TERMIN_OPTIONS } from "./TerminDropdown";
 
 export default function PaymentAllocationModal({
@@ -11,11 +7,13 @@ export default function PaymentAllocationModal({
   onSuccess,
   terminCount,
   initialSelections = [],
+  destinations,
+  products,
 }) {
   const [active, setActive] = useState(0);
-  const [selections, setSelections] = useState(["", "", ""]);
+  const [selections, setSelections] = useState([]);
   const [submitted, setSubmitted] = useState(false);
-  const [fieldErrors, setFieldErrors] = useState([false, false, false]);
+  const [fieldErrors, setFieldErrors] = useState([]);
   const [bannerMessage, setBannerMessage] = useState("");
   const [transition, setTransition] = useState(null);
   const [modalHeight, setModalHeight] = useState(600);
@@ -41,17 +39,16 @@ export default function PaymentAllocationModal({
   useEffect(() => {
     if (!open) return undefined;
 
+    setActive(0);
     setSubmitted(false);
-    setFieldErrors([false, false, false]);
+    setFieldErrors(destinations.map(() => false));
     setBannerMessage("");
     setSelections(
-      PAYMENT_DESTINATIONS.map((_, index) => {
+      destinations.map((_, index) => {
         const selection = initialSelections[index] ?? "";
-        return (
-        availableTermins.some((termin) => termin.value === selection)
+        return availableTermins.some((termin) => termin.value === selection)
           ? selection
-          : ""
-        );
+          : "";
       }),
     );
     document.body.style.overflow = "hidden";
@@ -147,7 +144,7 @@ export default function PaymentAllocationModal({
     if (invalidIndex >= 0) {
       setFieldErrors(selections.map((selection) => !selection));
       setBannerMessage(
-        `Anda belum melakukan pengaturan untuk: ${PAYMENT_DESTINATIONS[invalidIndex].name}.`,
+        `Anda belum melakukan pengaturan untuk: ${destinations[invalidIndex].name}.`,
       );
       switchTab(invalidIndex);
       window.setTimeout(() => selectRefs.current[invalidIndex]?.focus(), 650);
@@ -159,14 +156,14 @@ export default function PaymentAllocationModal({
       (termin) => !selectedTerminTypes.has(termin.value),
     );
     if (missingTermin) {
-      setFieldErrors([false, false, false]);
+      setFieldErrors(destinations.map(() => false));
       setBannerMessage(
         `Anda belum melakukan pengaturan untuk: ${missingTermin.label}.`,
       );
       return;
     }
 
-    setFieldErrors([false, false, false]);
+    setFieldErrors(destinations.map(() => false));
     setBannerMessage("");
     onSuccess({
       terminCount: availableTerminCount,
@@ -226,7 +223,7 @@ export default function PaymentAllocationModal({
 
         <div className="allocation-main">
           <aside className="allocation-tabs" aria-label="Lokasi pengiriman">
-            {PAYMENT_DESTINATIONS.map((destination, index) => (
+            {destinations.map((destination, index) => (
               <button
                 className={`allocation-tab${active === index ? " active" : ""}${fieldErrors[index] ? " error" : ""}`}
                 type="button"
@@ -240,7 +237,7 @@ export default function PaymentAllocationModal({
           </aside>
 
           <section className="allocation-content" ref={contentRef}>
-            {PAYMENT_DESTINATIONS.map((destination, index) => (
+            {destinations.map((destination, index) => (
               <article
                 className={`allocation-panel ${panelClass(index)}`}
                 key={destination.name}
@@ -256,7 +253,7 @@ export default function PaymentAllocationModal({
                   <label className="allocation-termin-field">
                     <select
                       className={fieldErrors[index] ? "error" : ""}
-                      value={selections[index]}
+                      value={selections[index] ?? ""}
                       ref={(element) => {
                         selectRefs.current[index] = element;
                       }}
@@ -290,16 +287,14 @@ export default function PaymentAllocationModal({
                       </tr>
                     </thead>
                     <tbody>
-                      {PAYMENT_PRODUCTS[index].map((product, rowIndex) => (
+                      {(products[index] ?? []).map((product, rowIndex) => (
                         <tr key={`${product}-${rowIndex}`}>
                           <td>{product}</td>
                           <td>{rowIndex % 2 ? 5 : 10} unit</td>
-                          <td>Instalasi AC × {rowIndex % 2 ? 5 : 10}</td>
-                          <td>Rp 500.000</td>
-                          <td>Rp 500.000</td>
-                          <td>
-                            {rowIndex % 2 ? "Rp 52.500.000" : "Rp 55.500.000"}
-                          </td>
+                          <td>Instalasi AC × 10</td>
+                          <td>Rp 5.000.000</td>
+                          <td>Rp 750.000</td>
+                          <td>Rp 47.750.000</td>
                         </tr>
                       ))}
                     </tbody>
@@ -313,15 +308,15 @@ export default function PaymentAllocationModal({
                   </div>
                   <div>
                     <span>Total Harga Produk ({destination.count} Produk)</span>
-                    <strong>Rp 55.500.000</strong>
+                    <strong>Rp 42.000.000</strong>
                   </div>
                   <div>
                     <span>Total Layanan Tambahan</span>
-                    <strong>Rp 7.500.000</strong>
+                    <strong>Rp 5.000.000</strong>
                   </div>
                   <div>
                     <span>Total Ongkos Kirim</span>
-                    <strong>Rp 1.000.000</strong>
+                    <strong>Rp 750.000</strong>
                   </div>
                   <div>
                     <span>Total Pesanan</span>
